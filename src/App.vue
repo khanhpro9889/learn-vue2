@@ -43,10 +43,20 @@ export default {
       this.fetchPostsList();
     },
     async handleSubmit(body) {
-      await axios.post("http://localhost:3000/posts", {
-        ...body,
-        author: "typicode",
-      });
+      if (this.selectedPost) {
+        await axios.patch(
+          `http://localhost:3000/posts/${this.selectedPost.id}`,
+          {
+            ...body,
+            author: "typicode",
+          }
+        );
+      } else {
+        await axios.post("http://localhost:3000/posts", {
+          ...body,
+          author: "typicode",
+        });
+      }
       this.fetchPostsList();
     },
     startEditPost(post) {
