@@ -1,28 +1,71 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="app" class="wrapper">
+    <post-form
+      v-on:handleSubmit="handleSubmit"
+      :post="selectedPost"
+      v-on:handleCancelEdit="selectedPost = undefined"
+    ></post-form>
+    <template v-for="item in postsList">
+      <post-item
+        :item="item"
+        :key="item.id"
+        v-on:deletePost="deletePost"
+        v-on:editPost="startEditPost"
+      ></post-item>
+    </template>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import PostItem from "./components/post-item.vue";
+import PostForm from "./components/post-form.vue";
+import axios from "axios";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld
-  }
-}
+    "post-item": PostItem,
+    "post-form": PostForm,
+  },
+  data: () => {
+    return {
+      postsList: [],
+      selectedPost: undefined,
+    };
+  },
+  methods: {
+    async fetchPostsList() {
+      const res = await axios.get("http://localhost:3000/posts");
+      this.postsList = res.data.slice(0, 10);
+    },
+    async deletePost(postId) {
+      await axios.delete(`http://localhost:3000/posts/${postId}`);
+      this.fetchPostsList();
+    },
+    async handleSubmit(body) {
+      await axios.post("http://localhost:3000/posts", {
+        ...body,
+        author: "typicode",
+      });
+      this.fetchPostsList();
+    },
+    startEditPost(post) {
+      this.selectedPost = post;
+    },
+  },
+  created() {
+    this.fetchPostsList();
+  },
+};
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+* {
+  padding: 0px;
+  margin: 0px;
+  box-sizing: border-box;
+}
+.wrapper {
+  padding-inline: 50px;
 }
 </style>
